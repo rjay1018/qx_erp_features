@@ -46,8 +46,8 @@ class ProductProduct(models.Model):
         config = self._get_config()
 
         for product in self:
-            # Handle edge case: no stock available
-            if product.qty_available <= 0:
+            # Handle edge case: negative stock
+            if product.qty_available < 0:
                 product.avg_weekly_usage = 0
                 product.days_until_oos = 0
                 product.forecast_status = 'critical'
@@ -76,7 +76,11 @@ class ProductProduct(models.Model):
             product.avg_weekly_usage = avg_weekly
 
             # Estimate days until out of stock (based on average weekly usage)
-            product.days_until_oos = int(product.qty_available / (avg_weekly / 7)) if avg_weekly else 9999
+            if avg_weekly > 0:
+                product.days_until_oos = int(product.qty_available / (avg_weekly / 7))
+            else:
+                # If no historical usage, assume infinite time until OOS
+                product.days_until_oos = 9999
 
             # Categorize forecast health using configurable thresholds
             if product.days_until_oos > config['warning_threshold']:
@@ -86,4 +90,3 @@ class ProductProduct(models.Model):
             else:
                 status = 'critical'  # Less than critical threshold
             product.forecast_status = status
-            
