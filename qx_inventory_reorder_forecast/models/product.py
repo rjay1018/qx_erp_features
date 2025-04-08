@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    # Average number of units sold per week, computed based on past 90 days of outgoing stock moves
+    # Average number of units sold per week, computed based on past X days of outgoing stock moves
     avg_weekly_usage = fields.Float(
         string="Avg Weekly Usage", 
         compute="_compute_forecast_data", 
@@ -19,9 +19,9 @@ class ProductProduct(models.Model):
     )
 
     # Visual indicator for stock health based on forecast:
-    # - ok: more than 3 weeks left
-    # - warning: 1 to 3 weeks
-    # - critical: less than 1 week
+    # - ok: more than Y weeks left
+    # - warning: Z to Y weeks
+    # - critical: less than Z weeks
     forecast_status = fields.Selection([
         ('ok', '✅ Healthy'),
         ('warning', '⚠️ Low'),
@@ -32,37 +32,58 @@ class ProductProduct(models.Model):
     store=True
     )
 
+    def _get_config(self):
+        """Retrieve configurable parameters from system settings."""
+        return {
+            'history_days': int(self.env['ir.config_parameter'].sudo().get_param('inventory_reorder_forecast.history_days', 90)),
+            'critical_threshold': int(self.env['ir.config_parameter'].sudo().get_param('inventory_reorder_forecast.critical_threshold', 7)),
+            'warning_threshold': int(self.env['ir.config_parameter'].sudo().get_param('inventory_reorder_forecast.warning_threshold', 21)),
+        }
+
     @api.depends('qty_available')  # Trigger recomputation when stock changes
     def _compute_forecast_data(self):
         StockMove = self.env['stock.move']
+        config = self._get_config()
+
         for product in self:
-            # Calculate 90 days ago from today
-            date_from = fields.Datetime.to_string(datetime.now() - timedelta(days=90))
+            # Handle edge case: no stock available
+            if product.qty_available <= 0:
+                product.avg_weekly_usage = 0
+                product.days_until_oos = 0
+                product.forecast_status = 'critical'
+                continue
 
-            # Get all completed outgoing moves for the product in the last 90 days
-            outgoing_moves = StockMove.search([
-                ('product_id', '=', product.id),
-                ('state', '=', 'done'),
-                ('location_id.usage', '=', 'internal'),       # from internal location
-                ('location_dest_id.usage', '!=', 'internal'), # to external (sales/shipment)
-                ('date', '>=', date_from)
-            ])
+            # Calculate history period start date
+            date_from = fields.Datetime.to_string(datetime.now() - timedelta(days=config['history_days']))
 
-            # Total quantity moved out
-            total_out_qty = sum(move.product_uom_qty for move in outgoing_moves)
+            # Use read_group to aggregate outgoing stock moves efficiently
+            outgoing_data = StockMove.read_group(
+                [
+                    ('product_id', '=', product.id),
+                    ('state', '=', 'done'),
+                    ('location_id.usage', '=', 'internal'),       # From internal location
+                    ('location_dest_id.usage', '!=', 'internal'), # To external (sales/shipment)
+                    ('date', '>=', date_from)
+                ],
+                ['product_uom_qty'],
+                ['product_id']
+            )
+            total_out_qty = outgoing_data[0]['product_uom_qty'] if outgoing_data else 0
 
-            # Calculate average weekly usage (13 weeks = ~90 days)
-            avg_weekly = total_out_qty / 13 if total_out_qty else 0
+            # Calculate average weekly usage (e.g., 90 days = ~13 weeks)
+            weeks_in_history = config['history_days'] / 7
+            avg_weekly = total_out_qty / weeks_in_history if total_out_qty else 0
             product.avg_weekly_usage = avg_weekly
 
             # Estimate days until out of stock (based on average weekly usage)
             product.days_until_oos = int(product.qty_available / (avg_weekly / 7)) if avg_weekly else 9999
 
-            # Categorize forecast health
-            if product.days_until_oos > 21:
-                status = 'ok'        # 3+ weeks buffer
-            elif 7 < product.days_until_oos <= 21:
-                status = 'warning'   # 1–3 weeks left
+            # Categorize forecast health using configurable thresholds
+            if product.days_until_oos > config['warning_threshold']:
+                status = 'ok'        # More than warning threshold
+            elif config['critical_threshold'] < product.days_until_oos <= config['warning_threshold']:
+                status = 'warning'   # Between critical and warning thresholds
             else:
-                status = 'critical'  # Less than 1 week
+                status = 'critical'  # Less than critical threshold
             product.forecast_status = status
+            
