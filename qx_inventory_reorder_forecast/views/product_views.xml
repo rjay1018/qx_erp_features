@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_product_forecast_tree" model="ir.ui.view">
+        <field name="name">product.product.forecast.tree</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='type']" position="after">
+                <field name="avg_weekly_usage" />
+                <field name="days_until_oos" />
+                <field name="forecast_status" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_forecast_form" model="ir.ui.view">
+        <field name="name">product.product.forecast.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='inventory']" position="inside">
+                <field name="avg_weekly_usage" />
+                <field name="days_until_oos" />
+                <field name="forecast_status" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
