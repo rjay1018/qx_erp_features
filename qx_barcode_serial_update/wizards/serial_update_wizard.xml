@@ -15,7 +15,7 @@
                     <!-- Scanned Serials -->
                     <group>
                         <label for="scanned_serials" string="Scan Serial Numbers"/>
-                        <field name="scanned_serials" widget="barcode_scanner" nolabel="1"/>
+                        <field name="scanned_serials" widget="barcode_scanner" nolabel="1" placeholder="Scan barcode here..."/>
                     </group>
 
                     <!-- Validated Serials -->
@@ -33,7 +33,7 @@
                     <!-- Invalid/Duplicate Serials -->
                     <group>
                         <label for="invalid_serials" string="Invalid/Duplicate Serials"/>
-                        <field name="invalid_serials" readonly="1" nolabel="1" widget="textarea"/>
+                        <field name="invalid_serials" readonly="1" nolabel="1" widget="textarea" placeholder="Invalid or duplicate serials will appear here..."/>
                     </group>
                 </sheet>
 
