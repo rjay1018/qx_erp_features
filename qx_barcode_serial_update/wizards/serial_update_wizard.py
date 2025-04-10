@@ -84,24 +84,24 @@ class SerialUpdateWizard(models.TransientModel):
             }
         }
 
-    def _create_stock_move(self, lot):
-        """Create a stock move to adjust the stock quantity."""
-        move_vals = {
-            'name': _('Inventory Adjustment for %s' % self.product_id.name),
+    inventory_location = self.env['stock.location'].search([('usage', '=', 'inventory')], limit=1)
+    if not inventory_location:
+        raise UserError(_("Inventory adjustment location not found. Please check your configuration."))
+
+    move_vals = {
+        'name': _('Inventory Adjustment for %s' % self.product_id.name),
+        'product_id': self.product_id.id,
+        'product_uom_qty': 1,
+        'product_uom': self.product_id.uom_id.id,
+        'location_id': inventory_location.id,  # Use the dynamically found location
+        'location_dest_id': self.location_id.id,
+        'state': 'confirmed',
+        'move_line_ids': [(0, 0, {
             'product_id': self.product_id.id,
-            'product_uom_qty': 1,
-            'product_uom': self.product_id.uom_id.id,
-            'location_id': self.env.ref('stock.location_inventory').id,  # Inventory adjustment location
+            'product_uom_id': self.product_id.uom_id.id,
+            'qty_done': 1,
+            'location_id': inventory_location.id,
             'location_dest_id': self.location_id.id,
-            'state': 'confirmed',
-            'move_line_ids': [(0, 0, {
-                'product_id': self.product_id.id,
-                'product_uom_id': self.product_id.uom_id.id,
-                'qty_done': 1,
-                'location_id': self.env.ref('stock.location_inventory').id,
-                'location_dest_id': self.location_id.id,
-                'lot_id': lot.id,
-            })],
-        }
-        move = self.env['stock.move'].create(move_vals)
-        move._action_done()
+            'lot_id': lot.id,
+        })],
+    }
