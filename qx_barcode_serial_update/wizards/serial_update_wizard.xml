@@ -14,7 +14,7 @@
 
                     <!-- Scanned Serials -->
                     <group>
-                        <label for="scanned_serials" string="Scan Serial Numbers"/>
+                        <field name="scanned_serials" placeholder="One serial number per line"/>
                         <field name="scanned_serials" widget="barcode_scanner" nolabel="1"/>
                     </group>
 

@@ -16,7 +16,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'custom_serial_update/static/src/js/barcode_scanner.js',
+            'qx_barcode_serial_update/static/src/js/barcode_scanner.js',
         ],
     },
     'installable': True, 
