@@ -15,32 +15,20 @@
                     <!-- Scanned Serials -->
                     <group>
                         <label for="scanned_serials" string="Scan Serial Numbers"/>
-                        <field name="scanned_serials" widget="barcode_scanner" nolabel="1" placeholder="Scan barcode here..."/>
-                    </group>
-
-                    <!-- Validated Serials -->
-                    <group>
-                        <label for="lot_ids" string="Valid Serials"/>
-                        <field name="lot_ids" mode="tree" nolabel="1">
-                            <tree editable="bottom">
-                                <field name="name" string="Lot/Serial Number"/>
-                                <field name="product_id" string="Product"/>
-                                <field name="create_date" string="Created on"/>
-                            </tree>
-                        </field>
+                        <field name="scanned_serials" widget="barcode_scanner" nolabel="1"/>
                     </group>
 
                     <!-- Invalid/Duplicate Serials -->
                     <group>
                         <label for="invalid_serials" string="Invalid/Duplicate Serials"/>
-                        <field name="invalid_serials" readonly="1" nolabel="1" widget="textarea" placeholder="Invalid or duplicate serials will appear here..."/>
+                        <field name="invalid_serials" readonly="1" nolabel="1" widget="textarea"/>
                     </group>
                 </sheet>
 
                 <!-- Footer Buttons -->
                 <footer>
-                    <!-- Generate Report Button -->
-                    <button string="Generate Report" type="object" name="generate_summary_report" class="btn-primary"/>
+                    <!-- Create Button -->
+                    <button string="Create" type="object" name="action_create_stock_quants" class="btn-primary"/>
 
                     <!-- Cancel Button -->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
@@ -48,4 +36,4 @@
             </form>
         </field>
     </record>
-</odoo>
+</>
