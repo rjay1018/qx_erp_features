@@ -11,38 +11,30 @@ class SerialUpdateWizard(models.TransientModel):
         'stock.location',
         string='Stock Location',
         domain="[('usage', '=', 'internal')]",
-        required=True,
-        help="Select the stock location where the serials will be stored."
+        required=True
     )
-    scanned_serials = fields.Text(string='Scanned Serials', help="Enter serial numbers separated by new lines.")
-    valid_lot_ids = fields.Many2many('stock.production.lot', string='Valid Lots', readonly=True)
-    invalid_serials = fields.Text(string='Invalid/Duplicate Serials', readonly=True)
+    scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
 
-    @api.onchange('scanned_serials')
-    def _onchange_scanned_serials(self):
-        """Process scanned serials and validate them."""
+    def action_create_stock_quants(self):
+        """Process scanned serials, validate, and create stock quants."""
         if not self.scanned_serials:
-            self.valid_lot_ids = [(5, 0, 0)]  # Clear any previous records
-            self.invalid_serials = False
-            return
+            raise UserError(_("No serial numbers provided."))
 
-        serial_lines = self.scanned_serials.split('\n')
+        serial_lines = self.scanned_serials.strip().split('\n')
+        seen_serials = set()
         valid_lots = []
         invalid_serials = []
-        seen_serials = set()
 
         for serial in serial_lines:
             serial = serial.strip()
             if not serial:
                 continue
 
-            # Check for duplicates within input
             if serial in seen_serials:
                 invalid_serials.append(f"Duplicate in input: {serial}")
                 continue
             seen_serials.add(serial)
 
-            # Validate serial number
             lot = self.env['stock.production.lot'].search([
                 ('name', '=', serial),
                 ('product_id', '=', self.product_id.id)
@@ -52,21 +44,13 @@ class SerialUpdateWizard(models.TransientModel):
                 invalid_serials.append(f"Not found: {serial}")
                 continue
 
-            valid_lots.append(lot.id)
+            valid_lots.append(lot)
 
-        # Store valid and invalid results
-        self.valid_lot_ids = [(6, 0, valid_lots)]
-        self.invalid_serials = '\n'.join(invalid_serials) if invalid_serials else False
+        if not valid_lots:
+            raise UserError(_("No valid serials found to create stock quants.\n\nIssues:\n%s") % '\n'.join(invalid_serials))
 
-    def action_create_stock_quants(self):
-        """Create stock quant records for valid serials at the selected location."""
-        lots = self.valid_lot_ids
-
-        if not lots:
-            raise UserError(_("No valid serials found to create stock quants."))
-
-        for lot in lots:
-            # Create or update stock.quant for each serial
+        # Create or update stock quants
+        for lot in valid_lots:
             self.env['stock.quant']._update_available_quantity(
                 product_id=self.product_id,
                 location_id=self.location_id,
@@ -74,21 +58,22 @@ class SerialUpdateWizard(models.TransientModel):
                 lot_id=lot
             )
 
-        # Build success message
         message = f"""
-        ✅ Stock Quant Creation Successful:
-        ------------------------------------
-        ✅ Total Serials Scanned: {len(self.scanned_serials.splitlines())}
-        ✅ Valid Serials Processed: {len(lots)}
-        📍 Stock Location: {self.location_id.display_name}
+        ✅ Stock Quants Created!
+        ------------------------
+        Total Scanned: {len(serial_lines)}
+        Valid: {len(valid_lots)}
+        Invalid: {len(invalid_serials)}
+        Location: {self.location_id.display_name}
         """
 
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('Created Stock Quants'),
-            'res_model': 'stock.quant',
-            'view_mode': 'tree,form',
-            'domain': [('lot_id', 'in', lots.ids), ('location_id', '=', self.location_id.id)],
-            'target': 'current',
-            'context': dict(self.env.context, default_location_id=self.location_id.id),
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Stock Update'),
+                'message': message,
+                'sticky': False,
+                'type': 'success',
+            }
         }
