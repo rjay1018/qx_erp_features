@@ -16,14 +16,15 @@ class SerialUpdateWizard(models.TransientModel):
     scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
 
     def action_create_stock_quants(self):
-        """Process scanned serials, validate, and create stock quants."""
+        """Process scanned serials, auto-create lots if needed, and create stock quants."""
         if not self.scanned_serials:
             raise UserError(_("No serial numbers provided."))
 
         serial_lines = self.scanned_serials.strip().split('\n')
         seen_serials = set()
         valid_lots = []
-        invalid_serials = []
+        created_lots = []
+        duplicate_serials = []
 
         for serial in serial_lines:
             serial = serial.strip()
@@ -31,7 +32,7 @@ class SerialUpdateWizard(models.TransientModel):
                 continue
 
             if serial in seen_serials:
-                invalid_serials.append(f"Duplicate in input: {serial}")
+                duplicate_serials.append(serial)
                 continue
             seen_serials.add(serial)
 
@@ -40,14 +41,18 @@ class SerialUpdateWizard(models.TransientModel):
                 ('product_id', '=', self.product_id.id)
             ], limit=1)
 
+            # If not found, create it
             if not lot:
-                invalid_serials.append(f"Not found: {serial}")
-                continue
+                lot = self.env['stock.production.lot'].create({
+                    'name': serial,
+                    'product_id': self.product_id.id,
+                })
+                created_lots.append(serial)
 
             valid_lots.append(lot)
 
         if not valid_lots:
-            raise UserError(_("No valid serials found to create stock quants.\n\nIssues:\n%s") % '\n'.join(invalid_serials))
+            raise UserError(_("No serial numbers could be processed."))
 
         # Create or update stock quants
         for lot in valid_lots:
@@ -58,13 +63,14 @@ class SerialUpdateWizard(models.TransientModel):
                 lot_id=lot
             )
 
+        # Build message
         message = f"""
         ✅ Stock Quants Created!
         ------------------------
-        Total Scanned: {len(serial_lines)}
-        Valid: {len(valid_lots)}
-        Invalid: {len(invalid_serials)}
-        Location: {self.location_id.display_name}
+        🔢 Total Serials Scanned: {len(serial_lines)}
+        🆕 Lots Auto-Created: {len(created_lots)}
+        ♻️ Duplicates Ignored: {len(duplicate_serials)}
+        📍 Location: {self.location_id.display_name}
         """
 
         return {
