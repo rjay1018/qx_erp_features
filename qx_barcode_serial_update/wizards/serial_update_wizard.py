@@ -47,6 +47,7 @@ class SerialUpdateWizard(models.TransientModel):
                 lot = self.env['stock.production.lot'].create({
                     'name': serial,
                     'product_id': self.product_id.id,
+                    'company_id': self.env.company.id,  
                 })
                 created_lots.append(serial)
 
