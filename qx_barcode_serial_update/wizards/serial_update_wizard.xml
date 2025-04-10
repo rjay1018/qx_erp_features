@@ -12,9 +12,6 @@
                 <field name="scanned_serials" placeholder="One serial number per line"/>
                 <field name="invalid_serials" readonly="1" widget="text"/>
             </group>
-            <group>
-                <field name="valid_lot_ids" readonly="1" widget="many2many_tags"/>
-            </group>
             <footer>
                 <button name="action_create_stock_quants" type="object" string="Create Quants" class="btn-primary"/>
                 <button string="Cancel" class="btn-secondary" special="cancel"/>
