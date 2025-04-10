@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -20,6 +19,13 @@ class SerialUpdateWizard(models.TransientModel):
     scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
     invalid_serials = fields.Text(string='Invalid/Duplicate Serials', readonly=True)
 
+    def _get_inventory_location(self):
+        """Helper method to fetch the inventory adjustment location."""
+        inventory_location = self.env['stock.location'].search([('usage', '=', 'inventory')], limit=1)
+        if not inventory_location:
+            raise UserError(_("Inventory adjustment location not found. Please check your configuration."))
+        return inventory_location
+
     def action_adjust_stock(self):
         """Adjust stock quantities using inventory moves."""
         if not self.scanned_serials:
@@ -33,6 +39,9 @@ class SerialUpdateWizard(models.TransientModel):
         # Validate product tracking
         if self.product_id.tracking == 'none':
             raise UserError(_("This wizard is only applicable for products with serial or lot tracking."))
+
+        # Fetch the inventory adjustment location
+        inventory_location = self._get_inventory_location()
 
         # Track seen serials, duplicates, and results
         seen_serials = set()
@@ -61,7 +70,7 @@ class SerialUpdateWizard(models.TransientModel):
                 created_lots.append(serial)
 
             # Create a stock move to adjust the stock quantity
-            self._create_stock_move(lot)
+            self._create_stock_move(lot, inventory_location)
 
         # Feedback message
         message = f"""
@@ -84,24 +93,24 @@ class SerialUpdateWizard(models.TransientModel):
             }
         }
 
-    inventory_location = self.env['stock.location'].search([('usage', '=', 'inventory')], limit=1)
-    if not inventory_location:
-        raise UserError(_("Inventory adjustment location not found. Please check your configuration."))
-
-    move_vals = {
-        'name': _('Inventory Adjustment for %s' % self.product_id.name),
-        'product_id': self.product_id.id,
-        'product_uom_qty': 1,
-        'product_uom': self.product_id.uom_id.id,
-        'location_id': inventory_location.id,  # Use the dynamically found location
-        'location_dest_id': self.location_id.id,
-        'state': 'confirmed',
-        'move_line_ids': [(0, 0, {
+    def _create_stock_move(self, lot, inventory_location):
+        """Create a stock move to adjust the stock quantity."""
+        move_vals = {
+            'name': _('Inventory Adjustment for %s' % self.product_id.name),
             'product_id': self.product_id.id,
-            'product_uom_id': self.product_id.uom_id.id,
-            'qty_done': 1,
-            'location_id': inventory_location.id,
+            'product_uom_qty': 1,
+            'product_uom': self.product_id.uom_id.id,
+            'location_id': inventory_location.id,  # Use the inventory adjustment location
             'location_dest_id': self.location_id.id,
-            'lot_id': lot.id,
-        })],
-    }
+            'state': 'confirmed',
+            'move_line_ids': [(0, 0, {
+                'product_id': self.product_id.id,
+                'product_uom_id': self.product_id.uom_id.id,
+                'qty_done': 1,
+                'location_id': inventory_location.id,
+                'location_dest_id': self.location_id.id,
+                'lot_id': lot.id,
+            })],
+        }
+        move = self.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
+        move._action_done()
