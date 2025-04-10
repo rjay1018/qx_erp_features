@@ -6,53 +6,72 @@ class SerialUpdateWizard(models.TransientModel):
     _name = 'serial.update.wizard'
     _description = 'Serial Number Update Wizard'
 
-    product_id = fields.Many2one('product.product', string='Product', required=True)
+    product_id = fields.Many2one(
+        'product.product', string='Product', required=True,
+        domain=[('tracking', '!=', 'none')]  # Only allow products with tracking
+    )
     location_id = fields.Many2one(
         'stock.location',
         string='Stock Location',
         domain="[('usage', '=', 'internal')]",
         required=True
     )
-    scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
+    scanned_serials = fields.Text(
+        string='Scanned Serials',
+        help="Enter one serial number per line."
+    )
 
     def action_create_stock_quants(self):
         """Process scanned serials, auto-create lots if needed, and create stock quants."""
         if not self.scanned_serials:
             raise UserError(_("No serial numbers provided."))
 
-        serial_lines = self.scanned_serials.strip().split('\n')
+        # Parse and clean serial numbers
+        serial_lines = [serial.strip() for serial in self.scanned_serials.split('\n') if serial.strip()]
+        if not serial_lines:
+            raise UserError(_("No valid serial numbers provided."))
+
+        # Validate product tracking
+        if self.product_id.tracking == 'none':
+            raise UserError(_("This wizard is only applicable for products with serial or lot tracking."))
+
+        # Track seen serials, duplicates, and results
         seen_serials = set()
+        duplicate_serials = []
         valid_lots = []
         created_lots = []
-        duplicate_serials = []
 
+        # Batch search for existing lots
+        existing_lots = self.env['stock.production.lot'].search([
+            ('name', 'in', serial_lines),
+            ('product_id', '=', self.product_id.id)
+        ])
+        existing_lot_names = {lot.name: lot for lot in existing_lots}
+
+        # Process each serial number
         for serial in serial_lines:
-            serial = serial.strip()
-            if not serial:
-                continue
-
             if serial in seen_serials:
                 duplicate_serials.append(serial)
                 continue
             seen_serials.add(serial)
 
-            lot = self.env['stock.production.lot'].search([
-                ('name', '=', serial),
-                ('product_id', '=', self.product_id.id)
-            ], limit=1)
-
-            # If not found, create it
-            if not lot:
-                lot = self.env['stock.production.lot'].create({
+            # Check if the lot already exists
+            if serial in existing_lot_names:
+                valid_lots.append(existing_lot_names[serial])
+            else:
+                # Create a new lot
+                new_lot = self.env['stock.production.lot'].create({
                     'name': serial,
                     'product_id': self.product_id.id,
                 })
+                valid_lots.append(new_lot)
                 created_lots.append(serial)
 
-            valid_lots.append(lot)
-
         if not valid_lots:
-            raise UserError(_("No serial numbers could be processed."))
+            raise UserError(_("No valid serial numbers could be processed."))
+
+        # Ensure inventory mode is enabled
+        self = self.with_context(inventory_mode=True)
 
         # Create or update stock quants
         for lot in valid_lots:
@@ -63,7 +82,7 @@ class SerialUpdateWizard(models.TransientModel):
                 lot_id=lot
             )
 
-        # Build message
+        # Build feedback message
         message = f"""
         ✅ Stock Quants Created!
         ------------------------
@@ -72,6 +91,11 @@ class SerialUpdateWizard(models.TransientModel):
         ♻️ Duplicates Ignored: {len(duplicate_serials)}
         📍 Location: {self.location_id.display_name}
         """
+
+        if created_lots:
+            message += f"\n\n🆕 Created Lots:\n{', '.join(created_lots)}"
+        if duplicate_serials:
+            message += f"\n\n♻️ Duplicate Serials:\n{', '.join(duplicate_serials)}"
 
         return {
             'type': 'ir.actions.client',
