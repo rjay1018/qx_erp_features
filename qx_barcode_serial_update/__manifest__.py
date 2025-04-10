@@ -13,7 +13,12 @@
         'security/ir.model.access.csv',
         'views/product_views.xml', 
         'wizards/serial_update_wizard.xml', 
-    ], 
+    ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_serial_update/static/src/js/barcode_scanner.js',
+        ],
+    },
     'installable': True, 
     'application': False, 
 } 

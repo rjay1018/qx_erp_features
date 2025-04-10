@@ -4,18 +4,45 @@
         <field name="model">serial.update.wizard</field>
         <field name="arch" type="xml">
             <form string="Serial/Lot Inbound Update">
-                <group>
-                    <field name="product_id" readonly="1"/>
-                    <field name="scanned_serials" widget="textarea" nolabel="1"/>
-                    <field name="lot_ids" mode="tree" nolabel="1">
-                        <tree editable="bottom">
-                            <field name="name" string="Lot/Serial Number"/>
-                            <field name="product_id" string="Product"/>
-                            <field name="create_date" string="Created on"/>
-                        </tree>
-                    </field>
-                </group>
+                <!-- Main Content -->
+                <sheet>
+                    <!-- Product Selection -->
+                    <group>
+                        <field name="product_id" readonly="1"/>
+                        <field name="location_id"/>
+                    </group>
+
+                    <!-- Scanned Serials -->
+                    <group>
+                        <label for="scanned_serials" string="Scan Serial Numbers"/>
+                        <field name="scanned_serials" widget="barcode_scanner" nolabel="1"/>
+                    </group>
+
+                    <!-- Validated Serials -->
+                    <group>
+                        <label for="lot_ids" string="Valid Serials"/>
+                        <field name="lot_ids" mode="tree" nolabel="1">
+                            <tree editable="bottom">
+                                <field name="name" string="Lot/Serial Number"/>
+                                <field name="product_id" string="Product"/>
+                                <field name="create_date" string="Created on"/>
+                            </tree>
+                        </field>
+                    </group>
+
+                    <!-- Invalid/Duplicate Serials -->
+                    <group>
+                        <label for="invalid_serials" string="Invalid/Duplicate Serials"/>
+                        <field name="invalid_serials" readonly="1" nolabel="1" widget="textarea"/>
+                    </group>
+                </sheet>
+
+                <!-- Footer Buttons -->
                 <footer>
+                    <!-- Generate Report Button -->
+                    <button string="Generate Report" type="object" name="generate_summary_report" class="btn-primary"/>
+
+                    <!-- Cancel Button -->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
