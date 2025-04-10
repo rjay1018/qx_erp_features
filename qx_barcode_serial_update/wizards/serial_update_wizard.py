@@ -14,8 +14,35 @@ class SerialUpdateWizard(models.TransientModel):
         help="Select the stock location where the serials will be stored."
     )
     scanned_serials = fields.Text(string='Scanned Serials', help="Enter serial numbers separated by new lines.")
-    lot_ids = fields.One2many('stock.production.lot', 'wizard_id', string='Valid Serials')
+    lot_ids = fields.Many2many(
+        'stock.production.lot',
+        string='Valid Serials',
+        compute='_compute_lot_ids',
+        store=False  # Do not persist this relationship in the database
+    )
     invalid_serials = fields.Text(string='Invalid/Duplicate Serials', readonly=True)
+
+    @api.depends('scanned_serials')
+    def _compute_lot_ids(self):
+        """Compute the list of valid lots based on scanned serials."""
+        for wizard in self:
+            if wizard.scanned_serials:
+                serial_lines = wizard.scanned_serials.split('\n')
+                valid_lots = []
+
+                for serial in serial_lines:
+                    serial = serial.strip()
+                    if serial:
+                        lot = self.env['stock.production.lot'].search([
+                            ('name', '=', serial),
+                            ('product_id', '=', wizard.product_id.id)
+                        ], limit=1)
+                        if lot:
+                            valid_lots.append(lot.id)
+
+                wizard.lot_ids = [(6, 0, valid_lots)]
+            else:
+                wizard.lot_ids = False
 
     @api.onchange('scanned_serials')
     def _onchange_scanned_serials(self):
@@ -44,12 +71,9 @@ class SerialUpdateWizard(models.TransientModel):
                     invalid_serials.append(serial)
                     continue
 
-                # Link lot to wizard
-                lot.write({'wizard_id': self.id})
                 valid_lots.append(lot.id)
 
-            # Update lots and invalid serials
-            self.lot_ids = [(6, 0, valid_lots)]
+            # Update invalid serials
             self.invalid_serials = '\n'.join(invalid_serials) if invalid_serials else False
 
             # Notify user about invalid/duplicate serials
@@ -84,10 +108,4 @@ class SerialUpdateWizard(models.TransientModel):
         Stock Location: {self.location_id.display_name}
         """
         return self.env['bus.bus']._sendone(self.env.user.partner_id, 'snackbar', {'message': message})
-
-    @api.model
-    def unlink(self):
-        """Clean up temporary data when the wizard is closed."""
-        for wizard in self:
-            wizard.lot_ids.write({'wizard_id': False})
-        return super(SerialUpdateWizard, self).unlink()
+    
