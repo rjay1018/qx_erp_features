@@ -60,7 +60,22 @@ class SerialUpdateWizard(models.TransientModel):
                 ('product_id', '=', self.product_id.id)
             ], limit=1)
 
-            if not lot:
+            if lot:
+                # Check if the serial number already exists in the specified location
+                quant_exists = self.env['stock.quant'].search([
+                    ('product_id', '=', self.product_id.id),
+                    ('location_id', '=', self.location_id.id),
+                    ('lot_id', '=', lot.id),
+                    ('quantity', '>', 0)  # Ensure the serial number is already in stock
+                ], limit=1)
+
+                if quant_exists:
+                    raise UserError(_(
+                        "The serial number '%s' already exists for this product at the specified location. "
+                        "Please ensure serial numbers are unique."
+                    ) % serial)
+
+            else:
                 # Auto-create the lot
                 lot = self.env['stock.production.lot'].create({
                     'name': serial,
