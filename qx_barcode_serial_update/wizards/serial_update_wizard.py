@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -19,8 +20,8 @@ class SerialUpdateWizard(models.TransientModel):
     scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
     invalid_serials = fields.Text(string='Invalid/Duplicate Serials', readonly=True)
 
-    def action_create_stock_quants(self):
-        """Process scanned serials, auto-create lots if needed, and create stock quants."""
+    def action_adjust_stock(self):
+        """Adjust stock quantities using inventory moves."""
         if not self.scanned_serials:
             raise UserError(_("No serial numbers provided."))
 
@@ -36,17 +37,8 @@ class SerialUpdateWizard(models.TransientModel):
         # Track seen serials, duplicates, and results
         seen_serials = set()
         duplicate_serials = []
-        valid_lots = []
         created_lots = []
 
-        # Batch search for existing lots
-        existing_lots = self.env['stock.production.lot'].search([
-            ('name', 'in', serial_lines),
-            ('product_id', '=', self.product_id.id)
-        ])
-        existing_lot_names = {lot.name: lot for lot in existing_lots}
-
-        # Process each serial number
         for serial in serial_lines:
             if serial in seen_serials:
                 duplicate_serials.append(serial)
@@ -54,39 +46,26 @@ class SerialUpdateWizard(models.TransientModel):
             seen_serials.add(serial)
 
             # Check if the lot already exists
-            if serial in existing_lot_names:
-                valid_lots.append(existing_lot_names[serial])
-            else:
-                # Create a new lot
-                new_lot = self.env['stock.production.lot'].create({
+            lot = self.env['stock.production.lot'].search([
+                ('name', '=', serial),
+                ('product_id', '=', self.product_id.id)
+            ], limit=1)
+
+            if not lot:
+                # Auto-create the lot
+                lot = self.env['stock.production.lot'].create({
                     'name': serial,
                     'product_id': self.product_id.id,
                     'company_id': self.env.company.id,
                 })
-                valid_lots.append(new_lot)
                 created_lots.append(serial)
 
-        if not valid_lots:
-            raise UserError(_("No serial numbers could be processed."))
+            # Create a stock move to adjust the stock quantity
+            self._create_stock_move(lot)
 
-        # Ensure inventory mode is enabled
-        self = self.with_context(inventory_mode=True)
-
-        # Create or update stock quants
-        for lot in valid_lots:
-            self.env['stock.quant']._update_available_quantity(
-                product_id=self.product_id,
-                location_id=self.location_id,
-                quantity=1,
-                lot_id=lot
-            )
-
-        # Save invalids to display if needed
-        self.invalid_serials = '\n'.join(duplicate_serials)
-
-        # Build feedback message
+        # Feedback message
         message = f"""
-        ✅ Stock Quants Created!
+        ✅ Stock Adjustment Completed!
         ------------------------
         🔢 Total Scanned: {len(serial_lines)}
         🆕 Lots Auto-Created: {len(created_lots)}
@@ -94,18 +73,35 @@ class SerialUpdateWizard(models.TransientModel):
         📍 Location: {self.location_id.display_name}
         """
 
-        if created_lots:
-            message += f"\n\n🆕 Created Lots:\n{', '.join(created_lots)}"
-        if duplicate_serials:
-            message += f"\n\n♻️ Duplicate Serials:\n{', '.join(duplicate_serials)}"
-
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Stock Update'),
+                'title': _('Stock Adjustment'),
                 'message': message,
                 'sticky': False,
                 'type': 'success',
             }
         }
+
+    def _create_stock_move(self, lot):
+        """Create a stock move to adjust the stock quantity."""
+        move_vals = {
+            'name': _('Inventory Adjustment for %s' % self.product_id.name),
+            'product_id': self.product_id.id,
+            'product_uom_qty': 1,
+            'product_uom': self.product_id.uom_id.id,
+            'location_id': self.env.ref('stock.location_inventory').id,  # Inventory adjustment location
+            'location_dest_id': self.location_id.id,
+            'state': 'confirmed',
+            'move_line_ids': [(0, 0, {
+                'product_id': self.product_id.id,
+                'product_uom_id': self.product_id.uom_id.id,
+                'qty_done': 1,
+                'location_id': self.env.ref('stock.location_inventory').id,
+                'location_dest_id': self.location_id.id,
+                'lot_id': lot.id,
+            })],
+        }
+        move = self.env['stock.move'].create(move_vals)
+        move._action_done()
