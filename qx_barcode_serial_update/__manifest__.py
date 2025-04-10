@@ -10,6 +10,7 @@
     'author': 'jaynatz', 
     'depends': ['stock', 'product'], 
     'data': [ 
+        'security/ir.model.access.csv',
         'views/product_views.xml', 
         'wizards/serial_update_wizard.xml', 
     ], 
