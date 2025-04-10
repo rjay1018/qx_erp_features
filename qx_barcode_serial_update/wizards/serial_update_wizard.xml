@@ -1,22 +1,23 @@
 <odoo>
     <record id="view_serial_update_wizard_form" model="ir.ui.view">
-    <field name="name">serial.update.wizard.form</field>
-    <field name="model">serial.update.wizard</field>
-    <field name="arch" type="xml">
-        <form string="Serial Number Update Wizard">
-            <group>
-                <field name="product_id"/>
-                <field name="location_id"/>
-            </group>
-            <group>
-                <field name="scanned_serials" placeholder="One serial number per line"/>
-                <field name="invalid_serials" readonly="1" widget="text"/>
-            </group>
-            <footer>
-                <button name="action_create_stock_quants" type="object" string="Create Quants" class="btn-primary"/>
-                <button string="Cancel" class="btn-secondary" special="cancel"/>
-            </footer>
-        </form>
-    </field>
+        <field name="name">serial.update.wizard.form</field>
+        <field name="model">serial.update.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Serial Number Update Wizard">
+                <group>
+                    <field name="product_id"/>
+                    <field name="location_id"/>
+                </group>
+                <group>
+                    <!-- <field name="scanned_serials" placeholder="One serial number per line"/> -->
+                    <field name="scanned_serials" widget="barcode_scanner" nolabel="1"/>
+                    <field name="invalid_serials" readonly="1" widget="text"/>
+                </group>
+                <footer>
+                    <button name="action_adjust_stock" type="object" string="Adjust Stock" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
     </record>
 </odoo>

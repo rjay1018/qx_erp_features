@@ -82,6 +82,7 @@ class SerialUpdateWizard(models.TransientModel):
         📍 Location: {self.location_id.display_name}
         """
 
+        # Return an action to close the wizard
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -90,7 +91,9 @@ class SerialUpdateWizard(models.TransientModel):
                 'message': message,
                 'sticky': False,
                 'type': 'success',
-            }
+            },
+        }, {
+            'type': 'ir.actions.act_window_close'
         }
 
     def _create_stock_move(self, lot, inventory_location):
