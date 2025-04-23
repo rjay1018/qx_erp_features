@@ -16,7 +16,7 @@ class SerialUpdateWizard(models.TransientModel):
         domain="[('usage', '=', 'internal')]",
         required=True
     )
-    reference = fields.char(string='Internal Reference', help="Add here any internal ref such us PO Ref. or WH Transaction.")
+    reference = fields.Char(string='Internal Reference', help="Add here any internal ref such us PO Ref. or WH Transaction.")
     scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
     invalid_serials = fields.Text(string='Invalid/Duplicate Serials', readonly=True)
 
