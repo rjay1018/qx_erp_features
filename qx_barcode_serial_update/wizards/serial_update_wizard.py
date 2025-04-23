@@ -16,6 +16,7 @@ class SerialUpdateWizard(models.TransientModel):
         domain="[('usage', '=', 'internal')]",
         required=True
     )
+    reference = fields.char(string='Internal Reference', help="Add here any internal ref such us PO Ref. or WH Transaction.")
     scanned_serials = fields.Text(string='Scanned Serials', help="Enter one serial number per line.")
     invalid_serials = fields.Text(string='Invalid/Duplicate Serials', readonly=True)
 
@@ -79,6 +80,7 @@ class SerialUpdateWizard(models.TransientModel):
                 # Auto-create the lot
                 lot = self.env['stock.production.lot'].create({
                     'name': serial,
+                    'ref': self.reference,
                     'product_id': self.product_id.id,
                     'company_id': self.env.company.id,
                 })

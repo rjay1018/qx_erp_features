@@ -5,12 +5,13 @@
         <field name="arch" type="xml">
             <form string="Serial Number Update Wizard">
                 <group>
+                    <field name="reference"/>
                     <field name="product_id"/>
                     <field name="location_id"/>
                 </group>
                 <group>
                     <!-- <field name="scanned_serials" placeholder="One serial number per line"/> -->
-                    <field name="scanned_serials" widget="barcode_scanner" nolabel="1"/>
+                    <field name="scanned_serials" widget="barcode_scanner"/>
                     <field name="invalid_serials" readonly="1" widget="text"/>
                 </group>
                 <footer>
