@@ -1,10 +1,12 @@
-from odoo import models, fields, _ 
+from odoo import models, fields, _
+from odoo.exceptions import UserError
+
 
 class EmployeeChecklist(models.Model):
     _inherit = 'employee.checklist'
 
     description = fields.Text(string='Description')
-    
+
     def action_upload_document_from_checklist(self):
         employee_id = self.env.context.get('default_employee_id')
         if not employee_id:
