@@ -1,9 +1,16 @@
 from odoo import models, _
+from odoo.exceptions import UserError
 
-class HrEmployeeDocument(models.Model):
-    _inherit = 'hr.employee.document'
+class EmployeeChecklist(models.Model):
+    _inherit = 'employee.checklist'
 
-    def action_open_upload_wizard(self):
+    description = fields.Text(string='Description')
+    
+    def action_upload_document_from_checklist(self):
+        employee_id = self.env.context.get('default_employee_id')
+        if not employee_id:
+            raise UserError("No employee in context.")
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Upload Document'),
@@ -11,7 +18,7 @@ class HrEmployeeDocument(models.Model):
             'view_mode': 'form',
             'target': 'new',
             'context': {
-                'default_employee_id': self.employee_ref.id,
-                'default_checklist_item_id': self.document_name.id,
+                'default_employee_id': employee_id,
+                'default_checklist_item_id': self.id,
             }
         }
