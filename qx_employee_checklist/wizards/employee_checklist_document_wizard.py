@@ -11,6 +11,7 @@ class EmployeeChecklistDocumentWizard(models.TransientModel):
         string='Checklist Item',
         required=True,
         domain="[('document_type', 'in', ['entry', 'exit'])]",
+        default=lambda self: self.env.context.get('default_checklist_item_id')
     )
     attachment = fields.Binary(string="Document File", required=True)
     attachment_filename = fields.Char("Filename")

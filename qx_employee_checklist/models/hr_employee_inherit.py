@@ -1,16 +1,16 @@
-from odoo import models
+from odoo import models, fields, api
 
-class HrEmployeeInherit(models.Model):
+class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    def action_open_checklist_upload_wizard(self):
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Checklist Document Upload',
-            'res_model': 'employee.checklist.document.wizard',
-            'view_mode': 'form',
-            'target': 'new',
-            'context': {
-                'default_employee_id': self.id,
-            }
-        }
+    entry_document_ids = fields.One2many(
+        'hr.employee.document', 'employee_ref',
+        domain=[('document_name.document_type', '=', 'entry')],
+        string='Entry Documents'
+    )
+
+    exit_document_ids = fields.One2many(
+        'hr.employee.document', 'employee_ref',
+        domain=[('document_name.document_type', '=', 'exit')],
+        string='Exit Documents'
+    )
