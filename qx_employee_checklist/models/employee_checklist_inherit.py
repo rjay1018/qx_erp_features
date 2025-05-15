@@ -1,5 +1,4 @@
-from odoo import models, _
-from odoo.exceptions import UserError
+from odoo import models, fields, _ 
 
 class EmployeeChecklist(models.Model):
     _inherit = 'employee.checklist'
