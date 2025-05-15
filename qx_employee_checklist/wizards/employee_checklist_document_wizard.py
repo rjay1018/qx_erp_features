@@ -20,13 +20,16 @@ class EmployeeChecklistDocumentWizard(models.TransientModel):
         if not self.attachment:
             raise ValidationError(_("Please upload a document."))
 
+        # Create the attachment first
         attachment = self.env['ir.attachment'].create({
             'name': self.attachment_filename or self.checklist_item_id.name,
             'datas': self.attachment,
             'res_model': 'hr.employee.document',
         })
 
+        # Create the employee document
         self.env['hr.employee.document'].create({
+            'name': self.attachment_filename or f'Doc-{self.checklist_item_id.name}',
             'employee_ref': self.employee_id.id,
             'doc_attachment_id': [(6, 0, [attachment.id])],
             'document_name': self.checklist_item_id.id,
