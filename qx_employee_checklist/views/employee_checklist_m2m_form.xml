@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_employee_checklist_entry_m2m_form" model="ir.ui.view">
+        <field name="name">employee.checklist.m2m.form</field>
+        <field name="model">employee.checklist</field>
+        <field name="arch" type="xml">
+            <form string="Checklist Item">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="document_type"/>
+                        <field name="description"/>
+                    </group>
+                    <footer>
+                        <button name="action_upload_document_from_checklist"
+                                string="Upload"
+                                type="object"
+                                class="btn-primary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

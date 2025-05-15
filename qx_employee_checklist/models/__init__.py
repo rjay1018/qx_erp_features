@@ -1,2 +1,2 @@
-from . import hr_employee_inherit
-from . import hr_employee_document_inherit
+from . import employee_master_inherit
+from . import employee_checklist_inherit
