@@ -1,43 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ✅ Updated Checklist Tab -->
-    <record model="ir.ui.view" id="hr_employee_inherit_form_view_checklist_tree">
+    <!-- ✅ Entry Checklist Tree View -->
+    <record id="view_employee_document_entry_checklist_tree" model="ir.ui.view">
+        <field name="name">hr.employee.document.entry.checklist.tree</field>
+        <field name="model">hr.employee.document</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="document_name"/>
+                <field name="doc_attachment_id"/>
+                <field name="issue_date"/>
+                <field name="description"/>
+                <button name="action_open_upload_wizard" type="object" string="Upload" class="btn-primary"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ✅ Exit Checklist Tree View -->
+    <record id="view_employee_document_exit_checklist_tree" model="ir.ui.view">
+        <field name="name">hr.employee.document.exit.checklist.tree</field>
+        <field name="model">hr.employee.document</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="document_name"/>
+                <field name="doc_attachment_id"/>
+                <field name="issue_date"/>
+                <field name="description"/>
+                <button name="action_open_upload_wizard" type="object" string="Upload" class="btn-primary"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ✅ Extend hr.employee Form View -->
+    <record id="hr_employee_inherit_form_view_checklist_tree" model="ir.ui.view">
         <field name="name">hr.employee.form.view.checklist.tree</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
-            <page name="checklist" position="replace">
+            <page name="hr_settings" position="after">
                 <page name="checklist" string="Checklist">
                     <group>
                         <group string="Entry Checklist">
-                            <field name="entry_document_ids" nolabel="1">
-                                <tree editable="bottom">
-                                    <field name="document_name"/>
-                                    <field name="doc_attachment_id"/>
-                                    <field name="issue_date"/>
-                                    <field name="description"/>
-                                    <button name="action_open_upload_wizard"
-                                            type="object"
-                                            string="Upload"
-                                            class="btn-primary"/>
-                                </tree>
-                            </field>
+                            <field name="entry_document_ids"
+                                   view_id="qx_employee_checklist.view_employee_document_entry_checklist_tree"/>
                         </group>
-
                         <group string="Exit Checklist">
-                            <field name="exit_document_ids" nolabel="1">
-                                <tree editable="bottom">
-                                    <field name="document_name"/>
-                                    <field name="doc_attachment_id"/>
-                                    <field name="issue_date"/>
-                                    <field name="description"/>
-                                    <button name="action_open_upload_wizard"
-                                            type="object"
-                                            string="Upload"
-                                            class="btn-primary"/>
-                                </tree>
-                            </field>
+                            <field name="exit_document_ids"
+                                   view_id="qx_employee_checklist.view_employee_document_exit_checklist_tree"/>
                         </group>
                     </group>
                 </page>
@@ -46,4 +55,3 @@
     </record>
 
 </odoo>
-

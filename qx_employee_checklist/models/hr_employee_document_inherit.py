@@ -1,4 +1,4 @@
-from odoo import models
+from odoo import models, _
 
 class HrEmployeeDocument(models.Model):
     _inherit = 'hr.employee.document'
@@ -6,7 +6,7 @@ class HrEmployeeDocument(models.Model):
     def action_open_upload_wizard(self):
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Upload Document',
+            'name': _('Upload Document'),
             'res_model': 'employee.checklist.document.wizard',
             'view_mode': 'form',
             'target': 'new',
