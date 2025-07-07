@@ -7,6 +7,7 @@
     'depends': ['base', 'web'],
     'data': [
         'security/hide_import_groups.xml',
+        'security/assets.xml',
     ],
     'installable': True,
     'application': False,

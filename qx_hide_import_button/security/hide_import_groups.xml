@@ -1,6 +1,7 @@
 <odoo>
     <record id="group_no_import" model="res.groups">
         <field name="name">No Import Access</field>
-        <field name="category_id" ref="base.module_category_user_type"/>
+        <!-- No category, keeps the group hidden from App menus -->
+        <field name="category_id" eval="False"/>
     </record>
 </odoo>
