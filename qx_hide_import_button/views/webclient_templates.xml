@@ -1,7 +1,0 @@
-<odoo>
-    <template id="hide_import_button_template" inherit_id="web.ListView.buttons">
-        <xpath expr="//button[@name='import']" position="attributes">
-            <attribute name="t-if">not user.has_group('hide_import_button.group_no_import')</attribute>
-        </xpath>
-    </template>
-</odoo>

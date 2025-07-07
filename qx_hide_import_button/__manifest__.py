@@ -7,7 +7,6 @@
     'depends': ['base', 'web'],
     'data': [
         'security/hide_import_groups.xml',
-        'views/webclient_templates.xml',
     ],
     'installable': True,
     'application': False,
