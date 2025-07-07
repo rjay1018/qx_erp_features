@@ -1,0 +1,6 @@
+<odoo>
+    <record id="group_no_import" model="res.groups">
+        <field name="name">No Import Access</field>
+        <field name="category_id" ref="base.module_category_user_type"/>
+    </record>
+</odoo>
