@@ -24,6 +24,7 @@ class Milestone(models.Model):
     project_id = fields.Many2one('project.project', string='Project', required=True)
     deadline = fields.Date(string='Deadline')
     is_completed = fields.Boolean(string='Is Completed')
+    is_reached = fields.Boolean(string='Is Reached')
 
 class CostSheet(models.Model):
     _name = 'construction.cost.sheet'
