@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_construction_milestone,access_construction_milestone,model_construction_milestone,base.group_user,1,1,1,1
+access_construction_cost_sheet,access_construction_cost_sheet,model_construction_cost_sheet,base.group_user,1,1,1,1
+access_construction_drawing,access_construction_drawing,model_construction_drawing,base.group_user,1,1,1,1
+access_construction_purchase_request,access_construction_purchase_request,model_construction_purchase_request,base.group_user,1,1,1,1
+access_construction_daily_log,access_construction_daily_log,model_construction_daily_log,base.group_user,1,1,1,1
+access_construction_rfi,access_construction_rfi,model_construction_rfi,base.group_user,1,1,1,1
