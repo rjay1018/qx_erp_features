@@ -12,12 +12,6 @@ class Project(models.Model):
 
     actual_vs_forecast = fields.Float(string='Actual vs. Forecast', compute='_compute_actual_vs_forecast')
 
-class CostSheet(models.Model):
-    _inherit = 'construction.cost.sheet'
-
-    subcontractor_costs = fields.Float(string='Subcontractor Costs')
-    material_costs = fields.Float(string='Material Costs')
-    labor_costs = fields.Float(string='Labor Costs')
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
