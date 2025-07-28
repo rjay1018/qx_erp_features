@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit the partner form view to add new fields -->
+        <record id="view_partner_form_inherited" model="ir.ui.view">
+            <field name="name">res.partner.form.inherited</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Construction">
+                        <group>
+                            <field name="is_subcontractor"/>
+                            <field name="certification"/>
+                            <field name="compliance_info"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Inherit the purchase order form view to add new fields -->
+        <record id="view_purchase_order_form_inherited_retention" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherited.retention</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount_tax']" position="after">
+                    <field name="retention_amount"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

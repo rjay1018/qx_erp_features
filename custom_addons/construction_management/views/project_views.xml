@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit the project form view to add new fields -->
+        <record id="view_project_form_inherited" model="ir.ui.view">
+            <field name="name">project.project.form.inherited</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="critical_path"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Cost Sheet">
+                        <field name="cost_sheet"/>
+                    </page>
+                    <page string="Milestones">
+                        <field name="milestone_ids"/>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Inherit the task form view to add new fields -->
+        <record id="view_task_form_inherited" model="ir.ui.view">
+            <field name="name">project.task.form.inherited</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_ids']" position="after">
+                    <field name="task_location"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Milestone views -->
+        <record id="view_construction_milestone_tree" model="ir.ui.view">
+            <field name="name">construction.milestone.tree</field>
+            <field name="model">construction.milestone</field>
+            <field name="arch" type="xml">
+                <tree string="Milestones">
+                    <field name="name"/>
+                    <field name="project_id"/>
+                    <field name="deadline"/>
+                    <field name="is_completed"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_construction_milestone_form" model="ir.ui.view">
+            <field name="name">construction.milestone.form</field>
+            <field name="model">construction.milestone</field>
+            <field name="arch" type="xml">
+                <form string="Milestone">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="project_id"/>
+                            <field name="deadline"/>
+                            <field name="is_completed"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Cost Sheet views -->
+        <record id="view_construction_cost_sheet_tree" model="ir.ui.view">
+            <field name="name">construction.cost.sheet.tree</field>
+            <field name="model">construction.cost.sheet</field>
+            <field name="arch" type="xml">
+                <tree string="Cost Sheets">
+                    <field name="name"/>
+                    <field name="project_id"/>
+                    <field name="budget"/>
+                    <field name="actual_cost"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_construction_cost_sheet_form" model="ir.ui.view">
+            <field name="name">construction.cost.sheet.form</field>
+            <field name="model">construction.cost.sheet</field>
+            <field name="arch" type="xml">
+                <form string="Cost Sheet">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="project_id"/>
+                            <field name="budget"/>
+                            <field name="actual_cost"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Gantt chart view -->
+        <record id="view_project_gantt" model="ir.ui.view">
+            <field name="name">project.project.gantt</field>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <gantt string="Projects"
+                    date_start="date_start"
+                    date_stop="date_end"
+                    default_group_by="user_id"
+                    >
+                    <field name="name"/>
+                </gantt>
+            </field>
+        </record>
+
+        <record id="project.action_view_gantt" model="ir.actions.act_window">
+            <field name="name">Gantt</field>
+            <field name="res_model">project.project</field>
+            <field name="view_mode">gantt</field>
+            <field name="view_id" ref="view_project_gantt"/>
+        </record>
+
+    </data>
+</odoo>
