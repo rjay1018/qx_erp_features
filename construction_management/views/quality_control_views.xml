@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Quality Control views -->
+        <record id="view_construction_quality_control_tree" model="ir.ui.view">
+            <field name="name">construction.quality.control.tree</field>
+            <field name="model">construction.quality.control</field>
+            <field name="arch" type="xml">
+                <tree string="Quality Control">
+                    <field name="name"/>
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="inspection_date"/>
+                    <field name="inspected_by"/>
+                    <field name="status"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_construction_quality_control_form" model="ir.ui.view">
+            <field name="name">construction.quality.control.form</field>
+            <field name="model">construction.quality.control</field>
+            <field name="arch" type="xml">
+                <form string="Quality Control">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="project_id"/>
+                            <field name="task_id"/>
+                            <field name="inspection_date"/>
+                            <field name="inspected_by"/>
+                            <field name="status"/>
+                        </group>
+                        <notebook>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_construction_quality_control" model="ir.actions.act_window">
+            <field name="name">Quality Control</field>
+            <field name="res_model">construction.quality.control</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_construction_quality_control"
+            name="Quality Control"
+            parent="project.menu_main_pm"
+            action="action_construction_quality_control"
+            sequence="60"/>
+
+    </data>
+</odoo>

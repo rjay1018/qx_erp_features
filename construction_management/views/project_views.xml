@@ -17,6 +17,15 @@
                     <page string="Milestones">
                         <field name="milestone_ids"/>
                     </page>
+                    <page string="Planning">
+                        <field name="planning_ids"/>
+                    </page>
+                    <page string="Documents">
+                        <field name="document_ids"/>
+                    </page>
+                    <page string="Quality Control">
+                        <field name="quality_control_ids"/>
+                    </page>
                 </xpath>
             </field>
         </record>

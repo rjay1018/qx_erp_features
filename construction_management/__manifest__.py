@@ -9,13 +9,10 @@
     'depends': [
         'project',
         'hr_timesheet',
-#        'planning',
-#        'documents',
         'purchase',
         'account',
         'stock',
         'hr',
-#        'quality_control',
         'maintenance',
     ],
     'data': [
@@ -26,6 +23,8 @@
         'views/procurement_and_inventory_views.xml',
         'views/site_and_field_views.xml',
         'views/workforce_and_timesheet_views.xml',
+        'views/planning_views.xml',
+        'views/quality_control_views.xml',
     ],
     'installable': True,
     'application': True,
