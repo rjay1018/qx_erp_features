@@ -9,13 +9,13 @@
     'depends': [
         'project',
         'hr_timesheet',
-        'planning',
-        'documents',
+#        'planning',
+#        'documents',
         'purchase',
         'account',
         'stock',
         'hr',
-        'quality_control',
+#        'quality_control',
         'maintenance',
     ],
     'data': [
