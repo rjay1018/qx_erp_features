@@ -2,6 +2,6 @@
 from odoo import models, fields
 
 class ProductProduct(models.Model):
-    _inherit = "product.product"
+    _inherit = "product.template"
 
     client_barcode711 = fields.Char("711 Barcode", help="711-specific barcode for this product.")

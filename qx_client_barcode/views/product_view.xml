@@ -4,22 +4,10 @@
     <record id="view_product_form_inherit_customer_barcode" model="ir.ui.view">
         <field name="name">product.product.form.customer.barcode.inherit</field>
         <field name="model">product.product</field>
-        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
             <!-- Put it under the 'General Information' / identification area -->
-            <xpath expr="//sheet//group[1]" position="inside">
-                <field name="client_barcode711"/>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Optional: show on variant list in product template (variants smart tab) -->
-    <record id="product_variant_tree_inherit_customer_barcode" model="ir.ui.view">
-        <field name="name">product.variant.tree.customer.barcode.inherit</field>
-        <field name="model">product.product</field>
-        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//tree/field[@name='barcode']" position="after">
+            <xpath expr="//field[@name='barcode']" position="after">
                 <field name="client_barcode711"/>
             </xpath>
         </field>
