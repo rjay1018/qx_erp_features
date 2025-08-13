@@ -1,21 +1,16 @@
+# -*- coding: utf-8 -*-
 {
-    'name': 'Client Specific Product Barcode',
-    'version': '14.0.1.0.0',
-    'summary': 'Enable client-specific product barcodes using the pricelist',
-    'description': """
-        This module allows setting a specific barcode for a product on a client's pricelist.
-        This barcode is then displayed on Sales Orders and Delivery Slips.
-    """,
-    'author': 'Qx',
-    'website': '',
-    'category': 'Sales',
-    'depends': ['sale_management', 'stock'],
-    'data': [
-        'views/product_pricelist_item_views.xml',
-        'views/sale_order_views.xml',
-        'views/stock_move_views.xml',
-        'views/report_deliveryslip.xml',
+    "name": "Customer Product Barcode",
+    "version": "14.0.1.0.0",
+    "summary": "Use customer-specific product barcode on Delivery Report (DR)",
+    "description": "Adds a 'Customer Barcode' on products and uses it on the Delivery Slip. Falls back to internal barcode if empty.",
+    "author": "QX",
+    "license": "LGPL-3",
+    "depends": ["stock", "product"],
+    "data": [
+        "views/product_view.xml",
+        "report/report_deliveryslip_inherit.xml",
     ],
-    'installable': True,
-    'application': False,
+    "installable": True,
+    "application": False,
 }
