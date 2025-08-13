@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Add field on product variant form -->
-    <record id="view_product_form_inherit_customer_barcode" model="ir.ui.view">
-        <field name="name">product.product.form.customer.barcode.inherit</field>
-        <field name="model">product.product</field>
+    <record id="view_product_template_form_inherit_client_barcode711" model="ir.ui.view">
+        <field name="name">product.template.form.client.barcode711.inherit</field>
+        <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <!-- Put it under the 'General Information' / identification area -->
+            <xpath expr="//field[@name='barcode']" position="after">
+                <field name="client_barcode711"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_variant_form_inherit_client_barcode711" model="ir.ui.view">
+        <field name="name">product.product.form.client.barcode711.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
             <xpath expr="//field[@name='barcode']" position="after">
                 <field name="client_barcode711"/>
             </xpath>
