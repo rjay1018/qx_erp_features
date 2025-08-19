@@ -19,7 +19,7 @@ class ProductTemplate(models.Model):
             product.customer_barcode_count = len(product.customer_barcode_ids)
 
     def action_open_customer_barcodes(self):
-        """Button action to open customer barcodes for this product."""
+        """Button action to open customer barcodes for this product (template)."""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
@@ -28,4 +28,34 @@ class ProductTemplate(models.Model):
             'view_mode': 'tree,form',
             'domain': [('product_tmpl_id', '=', self.id)],
             'context': {'default_product_tmpl_id': self.id},
+        }
+
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    customer_barcode_ids = fields.One2many(
+        'customer.product.barcode',
+        'product_product_id',
+        string="Customer Barcodes"
+    )
+    customer_barcode_count = fields.Integer(
+        string="Customer Barcode Count",
+        compute="_compute_customer_barcode_count"
+    )
+
+    def _compute_customer_barcode_count(self):
+        for product in self:
+            product.customer_barcode_count = len(product.customer_barcode_ids)
+
+    def action_open_customer_barcodes(self):
+        """Button action to open customer barcodes for this product (variant)."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Customer Barcodes',
+            'res_model': 'customer.product.barcode',
+            'view_mode': 'tree,form',
+            'domain': [('product_product_id', '=', self.id)],
+            'context': {'default_product_product_id': self.id},
         }
