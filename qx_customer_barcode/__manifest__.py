@@ -11,7 +11,7 @@
     "data": [
         "views/customer_product_barcode_views.xml",
         "views/product_template_views.xml",
-        "report/report_deliveryslip_inherit.xml",
+        # "report/report_deliveryslip_inherit.xml",
     ],
     "installable": True,
     "application": False,
