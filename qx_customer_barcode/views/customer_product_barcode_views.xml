@@ -35,6 +35,6 @@
     <!-- Fixed parent -->
     <menuitem id="menu_customer_product_barcode_root"
               name="Customer Product Barcodes"
-              parent="product.menu_products"
+              parent="sale.product_menu_catalog"
               action="action_customer_product_barcode"/>
 </odoo>
