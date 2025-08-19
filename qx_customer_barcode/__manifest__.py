@@ -9,6 +9,7 @@
     'category': 'Inventory', 
     "depends": ["stock", "product"],
     "data": [
+        'security/ir.model.access.csv',
         "views/customer_product_barcode_views.xml",
         "views/product_template_views.xml",
         # "report/report_deliveryslip_inherit.xml",
