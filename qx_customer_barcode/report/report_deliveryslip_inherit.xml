@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_deliveryslip_customer_barcode_inherit" inherit_id="stock.report_deliveryslip">
-        <xpath expr="//img[contains(@t-att-src, 'product_id.barcode')]" position="replace">
-            <t t-set="cust_barcode"
-               t-value="env['customer.product.barcode'].search([('partner_id','=',o.partner_id.id), ('product_tmpl_id','=', line.product_id.product_tmpl_id.id)], limit=1).barcode"/>
-            <img t-att-src="'/report/barcode/?type=Code128&value=' + (cust_barcode or line.product_id.barcode or '') + '&width=600&height=100'"
-                 alt="Barcode"/>
+    <!-- Inherit Delivery Slip Report -->
+    <template id="report_deliveryslip_inherit_customer_barcode" inherit_id="stock.report_deliveryslip">
+        <xpath expr="//td[@name='barcode']" position="replace">
+            <td name="barcode">
+                <!-- Try to get the customer-specific barcode -->
+                <t t-set="customer_barcode"
+                   t-value="line.product_id.product_tmpl_id.customer_barcode_ids.filtered(lambda b: b.partner_id.id == o.partner_id.id)[:1].barcode"/>
+                
+                <t t-if="customer_barcode">
+                    <span>
+                        <t t-esc="customer_barcode"/>
+                    </span>
+                </t>
+                <t t-else="">
+                    <!-- fallback to product barcode -->
+                    <span>
+                        <t t-esc="line.product_id.barcode"/>
+                    </span>
+                </t>
+            </td>
         </xpath>
     </template>
 </odoo>
