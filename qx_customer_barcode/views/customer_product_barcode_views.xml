@@ -26,14 +26,15 @@
         </field>
     </record>
 
-    <menuitem id="menu_customer_product_barcode_root"
-              name="Customer Product Barcodes"
-              parent="product.menu_catalog"
-              action="action_customer_product_barcode"/>
-              
     <record id="action_customer_product_barcode" model="ir.actions.act_window">
         <field name="name">Customer Product Barcodes</field>
         <field name="res_model">customer.product.barcode</field>
         <field name="view_mode">tree,form</field>
     </record>
+
+    <!-- Fixed parent -->
+    <menuitem id="menu_customer_product_barcode_root"
+              name="Customer Product Barcodes"
+              parent="product.menu_products"
+              action="action_customer_product_barcode"/>
 </odoo>
