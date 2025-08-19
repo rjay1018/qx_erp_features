@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_deliveryslip_customer_barcode_inherit" inherit_id="stock.report_deliveryslip">
+        <xpath expr="//img[contains(@t-att-src, 'product_id.barcode')]" position="replace">
+            <t t-set="cust_barcode"
+               t-value="env['customer.product.barcode'].search([('partner_id','=',o.partner_id.id), ('product_tmpl_id','=', line.product_id.product_tmpl_id.id)], limit=1).barcode"/>
+            <img t-att-src="'/report/barcode/?type=Code128&value=' + (cust_barcode or line.product_id.barcode or '') + '&width=600&height=100'"
+                 alt="Barcode"/>
+        </xpath>
+    </template>
+</odoo>
