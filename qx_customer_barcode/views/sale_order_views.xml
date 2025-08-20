@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Extend sale.order.line tree view inside order_line One2many -->
+    <!-- Extend sale.order.line tree inside sale order -->
     <record id="view_order_line_tree_inherit_customer_barcode" model="ir.ui.view">
         <field name="name">sale.order.line.tree.customer.barcode</field>
         <field name="model">sale.order.line</field>
@@ -12,13 +12,16 @@
         </field>
     </record>
 
-    <!-- Extend sale.order.line form view inside order_line One2many -->
-    <record id="view_order_line_form_inherit_customer_barcode" model="ir.ui.view">
-        <field name="name">sale.order.line.form.customer.barcode</field>
-        <field name="model">sale.order.line</field>
-        <field name="inherit_id" ref="sale.view_order_line_form"/>
+    <!-- Extend sale.order form (where order_line form is defined) -->
+    <record id="view_order_form_inherit_customer_barcode" model="ir.ui.view">
+        <field name="name">sale.order.form.customer.barcode</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
+            <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+                <field name="customer_barcode" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='name']" position="after">
                 <field name="customer_barcode" readonly="1"/>
             </xpath>
         </field>
