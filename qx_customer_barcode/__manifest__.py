@@ -7,7 +7,7 @@
     "author": "QX",
     "license": "LGPL-3",    
     'category': 'Inventory', 
-    "depends": ["stock", "product"],
+    "depends": ["stock", "product","sale"],
     "data": [
         'security/ir.model.access.csv',
         "views/customer_product_barcode_views.xml",
