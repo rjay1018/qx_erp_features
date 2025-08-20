@@ -6,5 +6,6 @@ class CustomerProductBarcode(models.Model):
     _rec_name = "barcode"
 
     partner_id = fields.Many2one("res.partner", string="Customer", required=True)
-    product_tmpl_id = fields.Many2one("product.template", string="Product", required=True)
     barcode = fields.Char(string="Customer Barcode", required=True)
+    product_tmpl_id = fields.Many2one('product.template', string="Product Template")
+    product_product_id = fields.Many2one('product.product', string="Product Variant")
