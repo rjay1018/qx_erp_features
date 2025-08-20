@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Product Customer Barcode",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.1.0",
     "summary": "Assigned customer barcodes to products information",
     "description": "Adds a 'Customer Barcode' on products and uses it on the Delivery Slip. Falls back to internal barcode if empty.",
     "author": "QX",
