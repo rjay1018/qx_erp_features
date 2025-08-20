@@ -1,61 +1,51 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 
-class ProductTemplate(models.Model):
-    _inherit = "product.template"
 
-    customer_barcode_ids = fields.One2many(
-        'customer.product.barcode',
-        'product_tmpl_id',
-        string="Customer Barcodes"
+class CustomerProductBarcode(models.Model):
+    _name = "customer.product.barcode"
+    _description = "Customer Product Barcode"
+    _rec_name = "barcode"
+
+    partner_id = fields.Many2one(
+        "res.partner",
+        string="Customer",
+        required=True,
+        ondelete="cascade"
     )
-    customer_barcode_count = fields.Integer(
-        string="Customer Barcode Count",
-        compute="_compute_customer_barcode_count"
+    product_product_id = fields.Many2one(
+        "product.product",
+        string="Product Variant",
+        required=True,
+        ondelete="cascade"
     )
-
-    def _compute_customer_barcode_count(self):
-        for product in self:
-            product.customer_barcode_count = len(product.customer_barcode_ids)
-
-    def action_open_customer_barcodes(self):
-        """Button action to open customer barcodes for this product (template)."""
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Customer Barcodes',
-            'res_model': 'customer.product.barcode',
-            'view_mode': 'tree,form',
-            'domain': [('product_tmpl_id', '=', self.id)],
-            'context': {'default_product_tmpl_id': self.id},
-        }
-
-
-class ProductProduct(models.Model):
-    _inherit = "product.product"
-
-    customer_barcode_ids = fields.One2many(
-        'customer.product.barcode',
-        'product_product_id',
-        string="Customer Barcodes"
+    product_tmpl_id = fields.Many2one(
+        "product.template",
+        string="Product Template",
+        required=True,
+        ondelete="cascade"
     )
-    customer_barcode_count = fields.Integer(
-        string="Customer Barcode Count",
-        compute="_compute_customer_barcode_count"
-    )
+    barcode = fields.Char(string="Customer Barcode", required=True)
 
-    def _compute_customer_barcode_count(self):
-        for product in self:
-            product.customer_barcode_count = len(product.customer_barcode_ids)
+    _sql_constraints = [
+        (
+            "barcode_partner_product_unique",
+            "unique(partner_id, product_product_id)",
+            "A customer barcode must be unique per customer and product variant."
+        ),
+    ]
 
-    def action_open_customer_barcodes(self):
-        """Button action to open customer barcodes for this product (variant)."""
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Customer Barcodes',
-            'res_model': 'customer.product.barcode',
-            'view_mode': 'tree,form',
-            'domain': [('product_product_id', '=', self.id)],
-            'context': {'default_product_product_id': self.id},
-        }
+    @api.model
+    def create(self, vals):
+        """Auto-fill product_tmpl_id from product_product_id if missing"""
+        if vals.get("product_product_id") and not vals.get("product_tmpl_id"):
+            product = self.env["product.product"].browse(vals["product_product_id"])
+            vals["product_tmpl_id"] = product.product_tmpl_id.id
+        return super().create(vals)
+
+    def write(self, vals):
+        """Keep product_tmpl_id in sync when product_product_id changes"""
+        if vals.get("product_product_id"):
+            product = self.env["product.product"].browse(vals["product_product_id"])
+            vals["product_tmpl_id"] = product.product_tmpl_id.id
+        return super().write(vals)
